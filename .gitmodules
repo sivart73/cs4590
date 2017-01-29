@@ -1,0 +1,3 @@
+[submodule "ce2"]
+	path = ce2
+	url = https://github.com/sivart73/cs4590/ce2
