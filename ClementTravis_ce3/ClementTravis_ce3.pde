@@ -54,6 +54,7 @@ void setup() {
 
   voiceOneSound.setEndListener(new Bead() {
     public void messageReceived(Bead mess) {
+       backgroundGainGlide.setValue(backgroundVolume);
       voiceOneSound.setToLoopStart();
       voiceOneSound.pause(true);
     }
@@ -64,6 +65,7 @@ void setup() {
 
   voiceTwoSound.setEndListener(new Bead() {
     public void messageReceived(Bead mess) {
+      backgroundGainGlide.setValue(backgroundVolume);
       voiceTwoSound.setToLoopStart();
       voiceTwoSound.pause(true);
     }
@@ -91,25 +93,21 @@ void draw() {
   background(backgroundColor);  //fills the canvas with black (0) each frame
   overAllGain.setGain(volume);
 
-  if (voiceOneSound.isPaused() && voiceTwoSound.isPaused()) {
-    backgroundGainGlide.setValue(backgroundVolume);
-  } else {
-    backgroundGainGlide.setValue(lowbackgroundVolume);
-  }
+
 } 
 
 
 
 public void voiceOne() {
   voiceTwoSound.pause(true);
+  backgroundGainGlide.setValue(lowbackgroundVolume);
   voiceOneSound.setToLoopStart();
-
   voiceOneSound.start();
 }
 
 public void voiceTwo() {
   voiceOneSound.pause(true);
+  backgroundGainGlide.setValue(lowbackgroundVolume);
   voiceTwoSound.setToLoopStart();
-
   voiceTwoSound.start();
 }

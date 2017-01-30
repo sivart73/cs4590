@@ -6,8 +6,7 @@ Describe how your performed your ducking and any challenges you faced:
 
 My ducking is performed by changing the gain of the background wav file.  I also inserted a Glide in between the gain.  The glide should make the transition from one gain value over a period of time.  In my program that is 250 milliseconds.  
 
-The challenge I faced was figuring out when the voice files ended.  From the professors note on Piazza I figured out how to set the loops to pause once they are finished.  I used the isPaused method then to set background volume back to higher value once the voices are both paused.  
-
+The challenge I faced was figuring out when the voice files ended.  From the professors note on Piazza about setEndListener I figured out how to set the background sound back up when the voice file ends. 
 
 
 
