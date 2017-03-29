@@ -3,7 +3,16 @@ import beads.*;
 import org.jaudiolibs.beads.*;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.*;
 
+
+int numberEventStreams = 0;
+boolean useTTS = false;
+Set<String> friends = new HashSet<String>();
+Set<String> foes = new HashSet<String>();
+Set<String> expectedEmailSender = new HashSet<String>();
+
+Timer timer;
 
 SamplePlayer workout;
 SamplePlayer walking;
@@ -19,6 +28,12 @@ SamplePlayer vm;
 SamplePlayer mail;
 SamplePlayer text;
 
+
+SamplePlayer tweetMany;
+SamplePlayer mailHigh;
+SamplePlayer textHigh;
+
+SamplePlayer textToSpeech; 
 WavePlayer heart;
 WavePlayer heart2;
 
@@ -39,24 +54,35 @@ ArrayList<Notification> notifications;
 
 NotificationListener mylistener;
 Comparator<Notification> notifycompar ;
-PriorityQueue<Notification> notifyqueue ;
+PriorityQueue<Notification> emailQueue ;
+PriorityQueue<Notification> tweetQueue ;
+PriorityQueue<Notification> voiceMailQueue ;
+PriorityQueue<Notification> missedCallQueue ;
+PriorityQueue<Notification> textQueue ;
 
 
 Context currentContext = new Context();
 
 void setup() {
-    size(640, 480);
- ac = new AudioContext(); 
- ttsMaker = new TextToSpeechMaker();
- notifycompar = new NotificationComparator();
- notifyqueue = new PriorityQueue<Notification>(10, notifycompar);
+  size(640, 480);
+  ac = new AudioContext(); 
+  ttsMaker = new TextToSpeechMaker();
+  notifycompar = new NotificationComparator();
+  emailQueue = new PriorityQueue<Notification>(10, notifycompar);
+  tweetQueue = new PriorityQueue<Notification>(10, notifycompar);
+  voiceMailQueue = new PriorityQueue<Notification>(10, notifycompar);
+  missedCallQueue = new PriorityQueue<Notification>(10, notifycompar);
+  textQueue = new PriorityQueue<Notification>(10, notifycompar);
 
- buttons();
- 
+  buttons();
+
+  textToSpeech = getSamplePlayer("tts-sample.wav");
+  textToSpeech.pause(true);
+
+
   walking = getSamplePlayer("walking.wav");
   walking.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
   walking.pause(true);
-
 
   workout = getSamplePlayer("workout.wav");
   workout.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
@@ -85,11 +111,22 @@ void setup() {
   tweet = getSamplePlayer("tweet.wav");
   tweet.pause(true);
 
-c = new Compressor(ac, 1);
-c.setAttack(100);
-c.setDecay(10);
-c.setRatio(4.0);
-c.setThreshold(0.6);
+
+  mailHigh = getSamplePlayer("emailHighPriority.wav");
+  mailHigh.pause(true);
+
+  
+  textHigh = getSamplePlayer("textHighPriority.wav");
+  textHigh.pause(true);
+
+
+  tweetMany = getSamplePlayer("tweetsMany.wav");
+  tweetMany.pause(true);
+  c = new Compressor(ac, 1);
+  c.setAttack(100);
+  c.setDecay(10);
+  c.setRatio(4.0);
+  c.setThreshold(0.6);
 
   heart = new WavePlayer(ac, 125, Buffer.SINE);
 
@@ -98,9 +135,9 @@ c.setThreshold(0.6);
   g = new Gain(ac, 1, .5);
 
 
-  heartgain = new Gain(ac, 1, .5);
+  heartgain = new Gain(ac, 1, .8);
 
-  alertgain = new Gain(ac, 5, 2);
+  alertgain = new Gain(ac, 5, 1);
 
 
   heartgain.addInput(c);
@@ -115,6 +152,12 @@ c.setThreshold(0.6);
   alertgain.addInput(phone);
   alertgain.addInput(vm);
   alertgain.addInput(tweet);
+
+
+  alertgain.addInput(mailHigh);
+  alertgain.addInput(textHigh);
+
+  alertgain.addInput(tweetMany);
   ac.out.addInput(heartgain);
 
   ac.out.addInput(alertgain);
@@ -123,9 +166,14 @@ c.setThreshold(0.6);
   ac.start();
 
 
+  addFriendsFoe();
+  addEmailHotList();
+  endListen();
+
+
    //START NotificationServer setup
-  server = new NotificationServer();
-  
+   server = new NotificationServer();
+   
   //instantiating a custom class (seen below) and registering it as a listener to the server
 
   mylistener = new MyListener();
@@ -135,16 +183,19 @@ c.setThreshold(0.6);
   server.loadEventStream(eventDataJSON1);
   
   //END NotificationServer setup
+  //sonify();
 
 }
 
 
 void draw() {
+
   //this method must be present (even if empty) to process events such as keyPressed()  
 }
 
 
 public void Walking() {
+alertgain.setGain(1);
 
 
   walking.pause(false);
@@ -163,15 +214,10 @@ public void Walking() {
   currentContext = new Walking();
 
 
-
-while (notifyqueue.peek() != null) {
-println(notifyqueue.poll());
-
-
-}
 }
 
 public void WorkingOut() {
+alertgain.setGain(1);
 
   walking.pause(true);
   walking.setToLoopStart();
@@ -193,7 +239,7 @@ public void WorkingOut() {
 
 
 public void Socializing() {
-
+alertgain.setGain(2);
   walking.pause(true);
   walking.setToLoopStart();
 
@@ -202,7 +248,6 @@ public void Socializing() {
 
   socializing.pause(false);
   socializing.setToLoopStart();
-
 
   presenting.pause(true);
   presenting.setToLoopStart();
@@ -214,6 +259,7 @@ public void Socializing() {
 }
 
 public void Presenting() {
+alertgain.setGain(.5);
 
   walking.pause(true);
   walking.setToLoopStart();
@@ -234,51 +280,93 @@ public void Presenting() {
 }
 
 public void Heartbeat() {
-    if (heart.isPaused()) {
-      heart.pause(false);
-    } else {
-        heart.pause(true);
-    }
+  if (heart.isPaused()) {
+    heart.pause(false);
+  } else {
+    heart.pause(true);
+  }
 }
 
 
 public void Data1() {
-    changeEventStream(eventDataJSON1);
+  changeEventStream(eventDataJSON1);
 
 }
 
 public void Data2() {
-    changeEventStream(eventDataJSON2);
+  changeEventStream(eventDataJSON2);
 }
 
 
 public void Debug() {
-     changeEventStream(frameWorkDebugJSON);
+ changeEventStream(frameWorkDebugJSON);
 }
 
 
 public void changeEventStream(String eventDataJSON) {
     server.stopEventStream(); //always call this before loading a new stream
-    notifyqueue.clear();  // clean out priority queue - things get sort of weird if you don't
+    cleanQueues();  // clean out priority queue - things get sort of weird if you don't
     server.loadEventStream(eventDataJSON);
     println("**** New event stream loaded: " + eventDataJSON + " ****");
+  }
+
+
+
+  public void cleanQueues() {
+   emailQueue.clear();  
+   tweetQueue.clear();  
+   voiceMailQueue.clear();  
+   missedCallQueue.clear();  
+   textQueue.clear();  
+
+ }
+
+
+
+ public void controlEvent(ControlEvent theEvent) {
+  if (theEvent.isFrom(events)) {
+    int numberEventStreams = 0;
+    for (int i=0;i<events.getArrayValue().length;i++) {
+      println ((int)events.getArrayValue()[i]);
+      int n = (int)events.getArrayValue()[i];
+      if(n==1) {
+        numberEventStreams++;
+      }
+    }
+
+
+    if ((int)events.getArrayValue()[0] == 0){
+             emailQueue.clear();
+
+}
+
+    if ((int)events.getArrayValue()[1] == 0){
+            missedCallQueue.clear();
+
+}
+
+    if ((int)events.getArrayValue()[2] == 0){
+            textQueue.clear();
+
+}
+
+ if ((int)events.getArrayValue()[3] == 0){
+            tweetQueue.clear();
+
+}
+    if ((int)events.getArrayValue()[4] == 0){
+            voiceMailQueue.clear();
+
+}
+    if (numberEventStreams <= 2) {
+      useTTS = true;
+    } else {
+      useTTS = false;
+    }
+    println(numberEventStreams);    
+  }
 }
 
 
 
-
-public void playBackgroundSound(String background) {
-}
-
-
-// void controlEvent(ControlEvent theEvent) {
-//   if (theEvent.isFrom(events)) {
-//     currentContext.playEmail = (int) events.getArrayValue()[0];
-//     currentContext.playPhone = (int) events.getArrayValue()[1];
-//     currentContext.playText = (int) events.getArrayValue()[2];
-//     currentContext.playTweet = (int) events.getArrayValue()[3];
-//     currentContext.playVM = (int) events.getArrayValue()[4];
-
-
-//   }
 

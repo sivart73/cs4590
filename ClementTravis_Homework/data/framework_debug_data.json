@@ -9,38 +9,22 @@
   },
   {
     "type": "Tweet",
-    "timestamp": 300,
+    "timestamp": 3000,
     "sender": "Dan of Steel",
     "message": "WHY WOULD YOU NOT PUNT, OMG",
-    "priority": 3,
-    "retweets": 100,
+    "priority": 1,
+    "retweets": 3,
     "favorites": 1
   },
   {
     "type": "MissedCall",
-    "timestamp": 600,
+    "timestamp": 6000,
     "sender": "Alan Parsons",
     "priority": 1
   },
-    {
-    "type": "Email",
-    "timestamp": 1050,
-    "sender": "Dr. Maribeth Gandy",
-    "message": "[cs4590] Your assignment second file is late!",
-    "priority": 4,
-    "contentSummary": 3
-  },
-  {
-    "type": "Email",
-    "timestamp": 1100,
-    "sender": "Crown Prince Spammy McSpamerson",
-    "message": "THIS IS YOU LAST CHANCE TO SEND ME ALL YOUR BANKING INFO, DO IT NOW",
-    "priority": 4,
-    "contentSummary": 2
-  },
   {
     "type": "VoiceMail",
-    "timestamp": 1200,
+    "timestamp": 12000,
     "sender": "Alan Parsons",
     "message": "Dude! You gotta call me.",
     "priority": 2,
@@ -48,7 +32,7 @@
   },
   {
     "type": "Tweet",
-    "timestamp": 1500,
+    "timestamp": 15000,
     "sender": "Dan of Steel",
     "message": "FIRE PAUL JOHNSON, LMAO, WHO ARE WE GONNA GET INSTEAD????",
     "priority": 1,
@@ -57,12 +41,10 @@
   },
   {
     "type": "Email",
-    "timestamp": 1800,
+    "timestamp": 18000,
     "sender": "Engineer's Bookstore",
     "message": "Going out of business sale",
     "priority": 1,
     "contentSummary": 2
   }
-
-
 ]

@@ -25,7 +25,6 @@ class TextToSpeechMaker {
     VoiceManager voiceManager = VoiceManager.getInstance();
     voice = voiceManager.getVoice("kevin16");
     //using other voices is not supported (unfortunately), so you are stuck with Kevin16
-    
     //find our tts_sample directory and clean it out if it has files from a previous running of this sketch
     findTTSDirectory();
     cleanTTSDirectory();

@@ -7,7 +7,7 @@ class NotificationServer {
   
   Boolean debugMode = true; //set this to false to turn off the println statements on each Notification below
   
-  Timer timer;
+  //Timer timer;
   Calendar calendar;
   private ArrayList<NotificationListener> listeners;
   private ArrayList<Notification> currentNotifications;
@@ -27,7 +27,7 @@ class NotificationServer {
     for (int i = 0; i < currentNotifications.size(); i++) {
       this.scheduleTask(currentNotifications.get(i));
     }
-    
+    sonify();
   }
   
   public void stopEventStream() {

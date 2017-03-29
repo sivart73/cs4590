@@ -7,8 +7,9 @@ class Socializing extends Context{
 			minTweetPriority = 2;
 			minPhonePriority = 2;
 			minVmPriority = 2;
-			minEmailPriority = 2 ;
-			minTextPriority = 2;
+			minEmailPriority = 3 ;
+			minTextPriority = 1;
       } 
+
 
 }
